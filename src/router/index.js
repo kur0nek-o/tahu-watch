@@ -1,3 +1,5 @@
+import DetailPage from '@/pages/DetailPage.vue'
+import HomePage from '@/pages/HomePage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import RegisterPage from '@/pages/RegisterPage.vue'
 
@@ -15,6 +17,16 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: RegisterPage,
+    },
+    {
+      path: '/beranda',
+      name: 'beranda',
+      component: HomePage,
+    },
+    {
+      path: '/detail/:slug',
+      name: 'detail',
+      component: DetailPage,
     },
   ],
 })
