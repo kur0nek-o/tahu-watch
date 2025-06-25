@@ -12,7 +12,7 @@
         <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-6">
           <article>
             <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">
-              Selamat datang, User!
+              Selamat datang, {{ username }}!
             </h2>
             <p class="mt-2 text-base text-gray-700">
               Kelola, dan ulas film favorit Anda dengan mudah di Tahu Watch. Nikmati pengalaman
@@ -20,13 +20,42 @@
             </p>
           </article>
 
-          <div class="flex justify-center md:justify-end">
-            <div
-              class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600"
-            >
-              U
+          <Popover class="relative">
+            <div class="flex justify-center md:justify-end">
+              <PopoverButton
+                class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl font-bold text-gray-600 cursor-pointer"
+              >
+                {{ userInitial }}
+              </PopoverButton>
             </div>
-          </div>
+
+            <transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="translate-y-1 opacity-0"
+              enter-to-class="translate-y-0 opacity-100"
+              leave-active-class="transition duration-150 ease-in"
+              leave-from-class="translate-y-0 opacity-100"
+              leave-to-class="translate-y-1 opacity-0"
+            >
+              <PopoverPanel
+                class="absolute left-1/2 z-10 mt-3 -translate-x-1/2 transform px-4 sm:px-0"
+              >
+                <div class="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+                  <div class="bg-gray-50 p-4">
+                    <button
+                      type="button"
+                      @click="logout"
+                      class="flow-root cursor-pointer rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-red-700 text-primary-700 hover:text-white"
+                    >
+                      <span class="flex items-center">
+                        <span class="text-sm font-medium">Logout</span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </PopoverPanel>
+            </transition>
+          </Popover>
         </div>
       </header>
 
@@ -103,4 +132,26 @@
 import Logo from '@/assets/images/logo.png'
 import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
 import InputText from '@/components/forms/input-groups/InputText.vue'
+
+import { useAuth } from '@/composables/useAuth'
+import { useUserStore } from '@/stores/user'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
+import { computed } from 'vue'
+
+const { logout } = useAuth()
+
+const userStore = useUserStore()
+
+const userInitial = computed(() => {
+  return userStore.username.charAt(0).toUpperCase()
+})
+
+const username = computed(() => {
+  return userStore.username
+})
+
+// trying to access cookie directly
+const cookie = document.cookie
+
+console.log('Cookie:', cookie)
 </script>
