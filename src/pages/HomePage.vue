@@ -60,7 +60,7 @@
       </header>
 
       <main class="mt-6">
-        <PrimaryButton>Tambah Film</PrimaryButton>
+        <PrimaryButton @click="showModal = true">Tambah Film</PrimaryButton>
 
         <div class="flex mt-3 gap-x-3">
           <InputText id="search" placeholder="Cari film yang sudah Anda catat..." class="w-full" />
@@ -76,7 +76,7 @@
           </select>
         </div>
 
-        <div class="mt-6 grid grid-cols-2 gap-3">
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="overflow-hidden rounded-lg bg-white shadow cursor-pointer">
             <div class="relative">
               <img
@@ -117,8 +117,8 @@
               <h3 class="text-lg font-bold text-gray-900">JUDUL FILM</h3>
               <p class="text-xs text-gray-500 mb-2">Ditambahkan pada 12 Juni 2024</p>
               <p class="text-sm text-gray-700">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Saepe similique adipisci
-                dolorem eum, obcaecati facere iure culpa delectus velit labore!
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae reprehenderit rem
+                dolore perferendis quaerat enim ut excepturi maxime dignissimos cupiditate?
               </p>
             </div>
           </div>
@@ -126,21 +126,25 @@
       </main>
     </div>
   </div>
+
+  <ReviewModal v-model:isOpen="showModal" />
 </template>
 
 <script setup>
 import Logo from '@/assets/images/logo.png'
 import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
 import InputText from '@/components/forms/input-groups/InputText.vue'
+import ReviewModal from '@/components/overlays/modal-dialogs/ReviewModal.vue'
 
 import { useAuth } from '@/composables/useAuth'
 import { useUserStore } from '@/stores/user'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const { logout } = useAuth()
 
 const userStore = useUserStore()
+const showModal = ref(false)
 
 const userInitial = computed(() => {
   return userStore.username.charAt(0).toUpperCase()
@@ -149,9 +153,4 @@ const userInitial = computed(() => {
 const username = computed(() => {
   return userStore.username
 })
-
-// trying to access cookie directly
-const cookie = document.cookie
-
-console.log('Cookie:', cookie)
 </script>
