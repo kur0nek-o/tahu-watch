@@ -22,10 +22,24 @@
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <form class="space-y-6" @submit.prevent="submitHandler">
+        <form class="space-y-6" @submit.prevent="register(form, resetForm)">
           <AlertDesc
             title="Penting!"
             description="Ini hanyalah web demonstrasi. Jangan gunakan data pribadi Anda."
+          />
+
+          <AlertDesc
+            v-if="generalError"
+            variant="error"
+            title="Gagal"
+            :description="generalError"
+          />
+
+          <AlertDesc
+            v-if="successMessage"
+            variant="success"
+            title="Berhasil"
+            :description="successMessage"
           />
 
           <InputText
@@ -33,32 +47,40 @@
             label="Email"
             :autofocus="true"
             placeholder="Masukkan email Anda"
-            v-model="email"
+            v-model="form.email"
+            :error="errors?.email"
+            @input="clearError('email')"
           />
 
           <InputText
             id="username"
             label="Nama Pengguna"
             placeholder="Masukkan nama pengguna Anda"
-            v-model="username"
+            v-model="form.username"
+            :error="errors?.username"
+            @input="clearError('username')"
           />
 
           <InputPassword
             id="password"
             label="Kata Sandi"
             placeholder="Masukkan kata sandi Anda"
-            v-model="password"
+            v-model="form.password"
+            :error="errors?.password"
+            @input="clearError('password')"
           />
 
           <InputPassword
             id="confirm-password"
             label="Konfirmasi Kata Sandi"
             placeholder="Konfirmasi kata sandi Anda"
-            v-model="confirmPassword"
+            v-model="form.confirmPassword"
+            :error="errors?.confirmPassword"
+            @input="clearError('confirmPassword')"
           />
 
           <div>
-            <PrimaryButton type="submit" class="w-full">Daftar</PrimaryButton>
+            <PrimaryButton :loading="loading" type="submit" class="w-full">Daftar</PrimaryButton>
           </div>
         </form>
       </div>
@@ -67,25 +89,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useRegister } from '@/composables/useRegister'
+import { reactive } from 'vue'
 
-import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
-import InputText from '@/components/forms/input-groups/InputText.vue'
-import InputPassword from '@/components/forms/input-groups/InputPassword.vue'
-import AlertDesc from '@/components/feedback/alerts/AlertDesc.vue'
 import Logo from '@/assets/images/logo.png'
+import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
+import AlertDesc from '@/components/feedback/alerts/AlertDesc.vue'
+import InputPassword from '@/components/forms/input-groups/InputPassword.vue'
+import InputText from '@/components/forms/input-groups/InputText.vue'
 
-const email = ref('')
-const username = ref('')
-const password = ref('')
-const confirmPassword = ref('')
+const { register, clearError, errors, loading, generalError, successMessage } = useRegister()
 
-const submitHandler = () => {
-  console.log('Email:', email.value)
-  console.log('Username:', username.value)
-  console.log('Password:', password.value)
-  console.log('Confirm Password:', confirmPassword.value)
+const form = reactive({
+  email: '',
+  username: '',
+  password: '',
+  confirmPassword: '',
+})
 
-  console.log('Form submitted')
+const resetForm = () => {
+  form.email = ''
+  form.username = ''
+  form.password = ''
+  form.confirmPassword = ''
 }
 </script>
