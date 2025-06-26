@@ -25,7 +25,7 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="w-full max-w-3xl transform overflow-visible rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
               <DialogTitle as="h3" class="text-2xl font-semibold text-gray-900 mb-4">
                 Tambahkan Film Baru
@@ -35,9 +35,10 @@
                 <InputText
                   id="title"
                   label="Judul"
-                  :autofocus="true"
                   placeholder="Masukkan judul"
+                  @input="slugify($event.target.value)"
                   v-model="form.title"
+                  :autofocus="true"
                 />
 
                 <InputText
@@ -66,7 +67,17 @@
                   :rows="2"
                 />
 
-                <QuillEditor theme="snow" />
+                <div class="relative z-10">
+                  <QuillEditor
+                    v-if="editorReady"
+                    ref="editorRef"
+                    v-model:content="form.content"
+                    theme="snow"
+                    toolbar="essential"
+                    contentType="html"
+                    class="bg-white min-h-[200px]"
+                  />
+                </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
                   <SecondaryButton @click="emit('update:isOpen', false)" type="button"
@@ -88,18 +99,19 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { QuillEditor } from '@vueup/vue-quill'
-import { reactive } from 'vue'
+import { nextTick, reactive, ref, watch } from 'vue'
 
 import SecondaryButton from '@/components/elements/buttons/DangerButtom.vue'
 import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
 import InputText from '@/components/forms/input-groups/InputText.vue'
 import InputTextarea from '@/components/forms/textareas/InputArea.vue'
 
-defineProps({
+const props = defineProps({
   isOpen: Boolean,
 })
 
 const emit = defineEmits(['update:isOpen'])
+const editorReady = ref(false)
 
 const form = reactive({
   title: '',
@@ -108,6 +120,28 @@ const form = reactive({
   description: '',
   content: '',
 })
+
+const slugify = (text) => {
+  form.slug = text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-)|(-$)/g, '')
+}
+
+watch(
+  () => props.isOpen,
+  (val) => {
+    if (val) {
+      nextTick(() => {
+        setTimeout(() => {
+          editorReady.value = true
+        }, 200)
+      })
+    } else {
+      editorReady.value = false
+    }
+  },
+)
 
 function handleSubmit() {
   console.log('Form data:', form)

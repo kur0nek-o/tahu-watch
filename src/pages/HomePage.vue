@@ -60,10 +60,15 @@
       </header>
 
       <main class="mt-6">
-        <PrimaryButton @click="showModal = true">Tambah Film</PrimaryButton>
+        <PrimaryButton type="button" @click="showModal = true">Tambah Film</PrimaryButton>
 
         <div class="flex mt-3 gap-x-3">
-          <InputText id="search" placeholder="Cari film yang sudah Anda catat..." class="w-full" />
+          <InputText
+            :autofocus="true"
+            id="search"
+            placeholder="Cari film yang sudah Anda catat..."
+            class="w-full"
+          />
 
           <select
             id="status"
