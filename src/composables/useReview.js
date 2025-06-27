@@ -130,6 +130,29 @@ export function useReview() {
     }
   }
 
+  const deleteReview = async (slug) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const { data: response } = await api.delete('/review', {
+        params: { slug },
+      })
+
+      if (!response.status) {
+        throw new Error(response.message)
+      }
+
+      message.value = response.message
+      status.value = response.status
+    } catch (error) {
+      message.value = error.message
+      status.value = false
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     message,
@@ -145,5 +168,6 @@ export function useReview() {
     clearError,
     create,
     resetState,
+    deleteReview,
   }
 }

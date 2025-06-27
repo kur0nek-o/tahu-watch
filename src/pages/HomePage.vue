@@ -99,6 +99,7 @@
               :addedAt="data.createdAt"
               :description="data.description"
               :watchedStatus="data.status ? 'watched' : 'unwatched'"
+              :callback="all"
             />
           </div>
 
