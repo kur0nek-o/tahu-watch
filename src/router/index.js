@@ -28,7 +28,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/detail/:slug',
+      path: '/detail/:username',
       name: 'detail',
       component: DetailPage,
       meta: { requiresAuth: true },

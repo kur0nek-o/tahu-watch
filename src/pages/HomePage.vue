@@ -92,6 +92,8 @@
             <ReviewCard
               v-for="(data, index) in datas"
               :key="index"
+              :username="data.userId.username"
+              :slug="data.slug"
               :title="data.title"
               :coverImage="data.coverImage"
               :addedAt="data.createdAt"

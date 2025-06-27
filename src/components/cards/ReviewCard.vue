@@ -1,5 +1,8 @@
 <template>
-  <div class="overflow-hidden rounded-lg bg-white shadow cursor-pointer h-[420px] flex flex-col">
+  <div
+    class="overflow-hidden rounded-lg bg-white shadow cursor-pointer h-[420px] flex flex-col"
+    @click="redirectToDetail"
+  >
     <div class="relative w-full h-64">
       <img
         v-if="!imageError"
@@ -39,8 +42,17 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
+  slug: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -73,5 +85,16 @@ const formattedAddedAt = computed(() => {
   })
 })
 
+const router = useRouter()
 const imageError = ref(false)
+
+const redirectToDetail = () => {
+  const { slug, username } = props
+
+  router.push({
+    name: 'detail',
+    params: { username },
+    query: { slug },
+  })
+}
 </script>

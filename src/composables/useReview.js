@@ -73,6 +73,30 @@ export function useReview() {
     }
   }
 
+  const getBySlug = async (slug) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const { data: response } = await api.get('/review', {
+        params: { slug },
+      })
+
+      if (!response.status) {
+        throw new Error(response.message)
+      }
+
+      data.value = response.data
+      message.value = response.message
+      status.value = response.status
+    } catch (error) {
+      message.value = error.message
+      status.value = false
+    } finally {
+      loading.value = false
+    }
+  }
+
   const create = async (payload) => {
     resetState()
     loading.value = true
@@ -117,6 +141,7 @@ export function useReview() {
     currentPage,
     filter,
     all,
+    getBySlug,
     clearError,
     create,
     resetState,
