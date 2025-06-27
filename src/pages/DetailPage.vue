@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto max-w-3xl px-4 py-12">
+  <div class="mx-auto max-w-3xl px-4 py-12" v-if="!loading">
     <!-- Title -->
     <h1 class="text-4xl font-bold mb-4 leading-tight">
       {{ data?.title }}
