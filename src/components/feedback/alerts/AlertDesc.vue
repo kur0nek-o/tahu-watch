@@ -18,10 +18,10 @@
 
 <script setup>
 import {
-  ExclamationTriangleIcon,
   CheckCircleIcon,
-  XCircleIcon,
+  ExclamationTriangleIcon,
   InformationCircleIcon,
+  XCircleIcon,
 } from '@heroicons/vue/20/solid'
 import { computed } from 'vue'
 
@@ -29,7 +29,6 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'warning',
-    validator: (v) => ['warning', 'success', 'error', 'info'].includes(v),
   },
   title: {
     type: String,

@@ -31,7 +31,7 @@
                 Tambahkan Film Baru
               </DialogTitle>
 
-              <form class="space-y-4" @submit.prevent="handleSubmit">
+              <form class="space-y-4" @submit.prevent="create(form)">
                 <InputText
                   id="title"
                   label="Judul"
@@ -39,6 +39,7 @@
                   @input="slugify($event.target.value)"
                   v-model="form.title"
                   :autofocus="true"
+                  :error="errors?.title"
                 />
 
                 <InputText
@@ -48,13 +49,45 @@
                   placeholder="Masukkan judul"
                   v-model="form.slug"
                   helpText="Slug akan otomatis dihasilkan dari judul."
+                  :error="errors?.slug"
                 />
+
+                <div>
+                  <span class="text-base font-medium text-gray-900">Status</span>
+                  <p class="text-sm leading-5 text-gray-500">
+                    Status dari film yang akan ditambahkan.
+                  </p>
+
+                  <fieldset class="mt-4">
+                    <legend class="sr-only">Status Film</legend>
+
+                    <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">
+                      <div v-for="status in statusFilm" :key="status.id" class="flex items-center">
+                        <input
+                          :id="status.id"
+                          name="status"
+                          type="radio"
+                          :value="status.value"
+                          v-model="form.status"
+                          class="h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500"
+                        />
+                        <label
+                          :for="status.id"
+                          class="ml-3 block text-sm font-medium text-gray-700"
+                          >{{ status.title }}</label
+                        >
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
 
                 <InputText
                   id="coverImage"
                   label="Cover Image URL"
                   placeholder="Masukkan cover image URL"
                   v-model="form.coverImage"
+                  :error="errors?.coverImage"
+                  @input="clearError('coverImage')"
                 />
 
                 <InputTextarea
@@ -65,6 +98,8 @@
                   helpText="Maksimal untuk deskripsi adalah 150 karakter."
                   :maxlength="150"
                   :rows="2"
+                  :error="errors?.description"
+                  @input="clearError('description')"
                 />
 
                 <div class="relative z-10">
@@ -80,10 +115,13 @@
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
-                  <SecondaryButton @click="emit('update:isOpen', false)" type="button"
+                  <SecondaryButton
+                    :disabled="loading"
+                    @click="emit('update:isOpen', false)"
+                    type="button"
                     >Batal</SecondaryButton
                   >
-                  <PrimaryButton type="submit">Simpan</PrimaryButton>
+                  <PrimaryButton :loading="loading" type="submit">Simpan</PrimaryButton>
                 </div>
               </form>
             </DialogPanel>
@@ -92,40 +130,95 @@
       </div>
     </Dialog>
   </TransitionRoot>
+
+  <LoadingModal :is-open="loading" />
+  <ConfirmModal
+    :is-open="isConfirmOpen"
+    :title="confirmTitle"
+    :description="message"
+    :variant="confirmVariant"
+    @update:isOpen="setConfirmOpen"
+  />
 </template>
 
 <script setup>
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
+import { useReview } from '@/composables/useReview'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { QuillEditor } from '@vueup/vue-quill'
-import { nextTick, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 
 import SecondaryButton from '@/components/elements/buttons/DangerButtom.vue'
 import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
 import InputText from '@/components/forms/input-groups/InputText.vue'
 import InputTextarea from '@/components/forms/textareas/InputArea.vue'
+import ConfirmModal from '@/components/overlays/modal-dialogs/ConfirmModal.vue'
+import LoadingModal from '@/components/overlays/modal-dialogs/LoadingModal.vue'
 
 const props = defineProps({
   isOpen: Boolean,
+  callback: Function,
 })
 
-const emit = defineEmits(['update:isOpen'])
+const { clearError, create, resetState, errors, loading, message, status } = useReview()
+
 const editorReady = ref(false)
+
+const confirmTitle = computed(() => {
+  return status.value ? 'Berhasil' : 'Gagal'
+})
+
+const isConfirmOpen = computed(() => {
+  return !!message.value
+})
+
+const confirmVariant = computed(() => {
+  return status.value ? 'success' : 'error'
+})
+
+const statusFilm = [
+  { id: 'watched', title: 'Selesai Ditonton', value: true },
+  { id: 'unwatched', title: 'Belum Ditonton', value: false },
+]
+
+const emit = defineEmits(['update:isOpen'])
 
 const form = reactive({
   title: '',
   slug: '',
+  status: false,
   coverImage: '',
   description: '',
   content: '',
 })
+
+const resetForm = () => {
+  form.title = ''
+  form.slug = ''
+  form.status = false
+  form.coverImage = ''
+  form.description = ''
+  form.content = ''
+}
 
 const slugify = (text) => {
   form.slug = text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-)|(-$)/g, '')
+
+  clearError('title')
+  clearError('slug')
+}
+
+const setConfirmOpen = (val) => {
+  message.value = ''
+
+  if (status.value) {
+    emit('update:isOpen', val)
+    props.callback?.({ reset: true })
+  }
 }
 
 watch(
@@ -137,13 +230,12 @@ watch(
           editorReady.value = true
         }, 200)
       })
+
+      resetState()
+      resetForm()
     } else {
       editorReady.value = false
     }
   },
 )
-
-function handleSubmit() {
-  console.log('Form data:', form)
-}
 </script>

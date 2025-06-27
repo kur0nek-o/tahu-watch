@@ -1,5 +1,5 @@
 <template>
-  <button :type="type" :class="buttonClass" :disabled="isLoading">
+  <button :type="type" :class="buttonClass" :disabled="isLoading || disabled">
     <slot v-if="!isLoading"></slot>
 
     <div v-else class="flex items-center justify-center">
@@ -22,7 +22,7 @@
         </svg>
       </output>
 
-      <span> Loading... </span>
+      <span>Loading...</span>
     </div>
   </button>
 </template>
@@ -34,14 +34,16 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value),
   },
   type: {
     type: String,
     default: 'button',
-    validator: (value) => ['button', 'submit', 'reset'].includes(value),
   },
   loading: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
     type: Boolean,
     default: false,
   },
