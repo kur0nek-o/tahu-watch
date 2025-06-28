@@ -62,12 +62,17 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    resetErrors()
+    loading.value = true
+
     try {
       await api.post('/auth/logout')
 
       router.push('/login')
     } catch (err) {
       console.error('Gagal logout:', err)
+    } finally {
+      loading.value = false
     }
   }
 

@@ -130,6 +130,44 @@ export function useReview() {
     }
   }
 
+  const edit = async (payload, reviewId) => {
+    resetState()
+    loading.value = true
+
+    try {
+      if (!reviewId) {
+        throw new Error('Review ID tidak ditemukan')
+      }
+
+      const { data } = await api.put('/review', payload, {
+        params: { id: reviewId },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!data.status) {
+        throw new Error(data.message)
+      }
+
+      message.value = data.message
+      status.value = data.status
+    } catch (error) {
+      const { response } = error
+
+      if (response?.status === 400 && response.data?.errors) {
+        Object.entries(response.data.errors).forEach(([field, message]) => {
+          errors[field] = message
+        })
+      } else {
+        message.value = error.message
+        status.value = false
+      }
+    } finally {
+      loading.value = false
+    }
+  }
+
   const deleteReview = async (slug) => {
     resetState()
     loading.value = true
@@ -164,6 +202,7 @@ export function useReview() {
     currentPage,
     filter,
     all,
+    edit,
     getBySlug,
     clearError,
     create,

@@ -28,10 +28,13 @@
               class="w-full max-w-3xl transform overflow-visible rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
               <DialogTitle as="h3" class="text-2xl font-semibold text-gray-900 mb-4">
-                Tambahkan Film Baru
+                {{ isEdit ? 'Edit Film' : 'Tambahkan Film Baru' }}
               </DialogTitle>
 
-              <form class="space-y-4" @submit.prevent="create(form)">
+              <form
+                class="space-y-4"
+                @submit.prevent="isEdit ? edit(form, reviewId) : create(form)"
+              >
                 <InputText
                   id="title"
                   label="Judul"
@@ -159,18 +162,29 @@ import LoadingModal from '@/components/overlays/modal-dialogs/LoadingModal.vue'
 const props = defineProps({
   isOpen: Boolean,
   callback: Function,
+  slug: {
+    type: String,
+    default: '',
+  },
+  isEdit: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const { clearError, create, resetState, errors, loading, message, status } = useReview()
+const { clearError, create, edit, resetState, getBySlug, errors, loading, message, status, data } =
+  useReview()
 
 const editorReady = ref(false)
+const isAllowedConfirm = ref(false)
+const isInitialMount = ref(true)
 
 const confirmTitle = computed(() => {
   return status.value ? 'Berhasil' : 'Gagal'
 })
 
 const isConfirmOpen = computed(() => {
-  return !!message.value
+  return !!message.value && isAllowedConfirm.value
 })
 
 const confirmVariant = computed(() => {
@@ -184,6 +198,7 @@ const statusFilm = [
 
 const emit = defineEmits(['update:isOpen'])
 
+const reviewId = ref('')
 const form = reactive({
   title: '',
   slug: '',
@@ -194,6 +209,8 @@ const form = reactive({
 })
 
 const resetForm = () => {
+  reviewId.value = ''
+
   form.title = ''
   form.slug = ''
   form.status = false
@@ -219,20 +236,56 @@ const setConfirmOpen = (val) => {
     emit('update:isOpen', val)
     props.callback?.({ reset: true })
   }
+
+  if (!status.value && isInitialMount.value) {
+    emit('update:isOpen', val)
+  }
 }
 
 watch(
   () => props.isOpen,
-  (val) => {
+  async (val) => {
     if (val) {
+      isInitialMount.value = true
+      isAllowedConfirm.value = false
+
       nextTick(() => {
         setTimeout(() => {
           editorReady.value = true
         }, 200)
       })
 
-      resetState()
-      resetForm()
+      if (props.isEdit) {
+        await getBySlug(props.slug)
+
+        if (status.value) {
+          const response = data.value
+
+          reviewId.value = response?._id || ''
+
+          form.title = response?.title || ''
+          form.slug = response?.slug || ''
+          form.status = response?.status || false
+          form.coverImage = response?.coverImage || ''
+          form.description = response?.description || ''
+          form.content = response?.content || ''
+
+          slugify(response?.title || '')
+          resetState()
+
+          isInitialMount.value = false
+        }
+
+        setTimeout(() => {
+          isAllowedConfirm.value = true
+        }, 500)
+      } else {
+        resetState()
+        resetForm()
+
+        isAllowedConfirm.value = true
+        isInitialMount.value = false
+      }
     } else {
       editorReady.value = false
     }

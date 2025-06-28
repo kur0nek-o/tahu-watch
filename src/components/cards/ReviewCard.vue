@@ -51,6 +51,7 @@
                 <div class="bg-gray-50 p-2 space-y-1">
                   <button
                     type="button"
+                    @click="emit('open:edit', slug)"
                     class="flow-root cursor-pointer w-full rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-blue-700 text-primary-700 hover:text-white"
                   >
                     <span class="flex items-center">
@@ -143,6 +144,8 @@ const props = defineProps({
     default: null,
   },
 })
+
+const emit = defineEmits(['open:edit'])
 
 const { deleteReview, loading, status, message } = useReview()
 

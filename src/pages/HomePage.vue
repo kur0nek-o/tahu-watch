@@ -60,7 +60,7 @@
       </header>
 
       <main class="mt-6">
-        <PrimaryButton type="button" @click="showModal = true">Tambah Film</PrimaryButton>
+        <PrimaryButton type="button" @click="handleAddReview">Tambah Film</PrimaryButton>
 
         <div class="flex mt-3 gap-x-3">
           <InputText
@@ -100,6 +100,7 @@
               :description="data.description"
               :watchedStatus="data.status ? 'watched' : 'unwatched'"
               :callback="all"
+              @open:edit="handleEditReview"
             />
           </div>
 
@@ -132,7 +133,14 @@
     </div>
   </div>
 
-  <ReviewModal v-model:isOpen="showModal" :callback="all" />
+  <ReviewModal
+    v-model:isOpen="showModal"
+    :callback="all"
+    :slug="selectedReviewSlug"
+    :isEdit="isEditReview"
+  />
+
+  <LoadingModal :is-open="authLoading" />
 
   <ConfirmModal
     :is-open="isConfirmOpen"
@@ -149,6 +157,7 @@ import ReviewCard from '@/components/cards/ReviewCard.vue'
 import PrimaryButton from '@/components/elements/buttons/PrimaryButton.vue'
 import InputText from '@/components/forms/input-groups/InputText.vue'
 import ConfirmModal from '@/components/overlays/modal-dialogs/ConfirmModal.vue'
+import LoadingModal from '@/components/overlays/modal-dialogs/LoadingModal.vue'
 import ReviewModal from '@/components/overlays/modal-dialogs/ReviewModal.vue'
 
 import { useAuth } from '@/composables/useAuth'
@@ -158,7 +167,7 @@ import { useUserStore } from '@/stores/user'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-const { logout } = useAuth()
+const { logout, loading: authLoading } = useAuth()
 const { datas, loading, hasMore, all, filter, status, message } = useReview()
 
 const sentinel = ref(null)
@@ -167,6 +176,9 @@ const showModal = ref(false)
 
 const debouncedKeyword = useDebounce(() => filter.keyword, 500)
 const debouncedStatus = useDebounce(() => filter.status, 300)
+
+const isEditReview = ref(false)
+const selectedReviewSlug = ref('')
 
 const confirmTitle = computed(() => {
   return 'Gagal'
@@ -190,6 +202,18 @@ const username = computed(() => {
 
 const setConfirmOpen = () => {
   status.value = true
+}
+
+const handleAddReview = () => {
+  showModal.value = true
+  isEditReview.value = false
+  selectedReviewSlug.value = ''
+}
+
+const handleEditReview = (slug) => {
+  showModal.value = true
+  isEditReview.value = true
+  selectedReviewSlug.value = slug
 }
 
 let observer
